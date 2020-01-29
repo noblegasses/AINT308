@@ -23,6 +23,11 @@ Use this code as a base for your assignment.
 using namespace std;
 using namespace cv;
 
+void scanEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket);
+void chameleon(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket);
+void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket);
+void rollEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket);
+
 int main(int argc, char *argv[])
 {
     //Setup TCP coms
@@ -106,6 +111,18 @@ int main(int argc, char *argv[])
         case 'l'://right
             Lx=Lx+5;
             break;
+        case '1'://right
+            scanEye(CMDstream, CMD, u_sock, RxPacket);
+            break;
+        case '2'://right
+            chameleon(CMDstream, CMD, u_sock, RxPacket);
+            break;
+        case '3'://right
+            crossEye(CMDstream, CMD, u_sock, RxPacket);
+            break;
+        case '4'://right
+            rollEye(CMDstream, CMD, u_sock, RxPacket);
+            break;
 //        case 'e'://right
 //            Neck=Neck+5;
 //            break;
@@ -113,24 +130,24 @@ int main(int argc, char *argv[])
 //            Neck=Neck-5;
 //            break;
         }
-        for(int i=0; i<=2*pi*100; i++){
-            float scaledI=(float)i/100.0f;
-            float rawSin = sin(scaledI);
-            float neckVal = (rawSin*425)+1525;
-            //float neckVal = (rawSin-(-1))*((1950-1100)/((-1)-1))+1100;
-            Neck = (int)neckVal;
+//        for(int i=0; i<=2*pi*50; i++){
+//            float scaledI=(float)i/50.0f;
+//            float rawSin = sin(scaledI);
+//            float neckVal = (rawSin*425)+1525;
+//            //float neckVal = (rawSin-(-1))*((1950-1100)/((-1)-1))+1100;
+//            Neck = (int)neckVal;
 
-            cout << Neck;
+//            cout << Neck;
 
-            //Send new motor positions to the owl servos
-            CMDstream.str("");
-            CMDstream.clear();
-            CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
-            CMD = CMDstream.str();
-            RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+//            //Send new motor positions to the owl servos
+//            CMDstream.str("");
+//            CMDstream.clear();
+//            CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+//            CMD = CMDstream.str();
+//            RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
-            Sleep(10);
-        }
+//            Sleep(10);
+//        }
     } // END cursor control loop
 
     // close windows down
@@ -145,4 +162,130 @@ int main(int argc, char *argv[])
     close(clientSock);
 #endif
     exit(0); // exit here for servo testing only
+}
+
+
+void scanEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
+    Ry = RyC;
+    Ly = LyC;
+    for(int i=0; i<=2*pi*50; i++){
+        float scaledI=(float)i/50.0f;
+        float rawSin = sin(scaledI);
+        float rEyeVal = (rawSin*((RxRm-RxLm)/2))+((RxRm+RxLm)/2);
+        float lEyeVal = (rawSin*((LxRm-LxLm)/2))+((LxRm+LxLm)/2);
+        Rx = (int)rEyeVal;
+        Lx = (int)lEyeVal;
+
+        //Send new motor positions to the owl servos
+        CMDstream.str("");
+        CMDstream.clear();
+        CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+        CMD = CMDstream.str();
+        RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+
+        Sleep(10);
+    }
+}
+
+void chameleon(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
+
+
+    for(int i = 0; i<=3; i++){
+        int randEye = rand() %3;
+        unsigned long randTime = rand() %1000 + 50;
+        if(randEye == 0){
+            Rx = rand() %(RxRm-RxLm) + RxLm;
+            Ry = rand() %(RyTm-RyBm) + RyBm;
+            Lx = rand() %(LxRm-LxLm) + LxLm;
+            Ly = rand() %(LyBm-LyTm) + LyTm;
+        } else if(randEye == 1){
+            Rx = rand() %(RxRm-RxLm) + RxLm;
+            Ry = rand() %(RyTm-RyBm) + RyBm;
+        } else if(randEye == 2){
+            Lx = rand() %(LxRm-LxLm) + LxLm;
+            Ly = rand() %(LyBm-LyTm) + LyTm;
+        }
+
+        //Send new motor positions to the owl servos
+        CMDstream.str("");
+        CMDstream.clear();
+        CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+        CMD = CMDstream.str();
+        RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+
+        Sleep(randTime);
+    }
+}
+
+void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
+    Ry = RyC;
+    Ly = LyC;
+    for(int i=0; i<=25; i++){
+        float rEyeVal = (i*(-(RxRm-RxLm)/2))+((RxRm+RxLm)/2);
+        float lEyeVal = (i*((LxRm-LxLm)/2))+((LxRm+LxLm)/2);
+        Rx = (int)rEyeVal;
+        Lx = (int)lEyeVal;
+
+        //Send new motor positions to the owl servos
+        CMDstream.str("");
+        CMDstream.clear();
+        CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+        CMD = CMDstream.str();
+        RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+
+        Sleep(10);
+    }
+    Sleep(500);
+    for(int i=25; i<=0; i--){
+        float rEyeVal = (i*(-(RxRm-RxLm)/2))+((RxRm+RxLm)/2);
+        float lEyeVal = (i*((LxRm-LxLm)/2))+((LxRm+LxLm)/2);
+        Rx = (int)rEyeVal;
+        Lx = (int)lEyeVal;
+
+        //Send new motor positions to the owl servos
+        CMDstream.str("");
+        CMDstream.clear();
+        CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+        CMD = CMDstream.str();
+        RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+
+        Sleep(10);
+    }
+}
+
+void rollEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
+    Ry = RyC;
+    Ly = LyC;
+    for(int i=pi*50; i<=2*pi*50; i++){
+        float scaledI=(float)i/50.0f;
+        float rawSin = sin(scaledI);
+        float rxEyeVal = (rawSin*((RxRm-RxLm)/2))+(RxRm);
+        float lxEyeVal = (rawSin*((LxRm-LxLm)/2))+(LxRm);
+        float ryEyeVal = (rawSin*(-(RyTm-RyBm)/2))+((RyTm+RyBm)/2);
+        float lyEyeVal = (rawSin*((LyBm-LyTm)/2))+((LyTm+LyBm)/2);
+        Rx = (int)rxEyeVal;
+        Lx = (int)lxEyeVal;
+        Ry = (int)ryEyeVal;
+        Ly = (int)lyEyeVal;
+
+        //Send new motor positions to the owl servos
+        CMDstream.str("");
+        CMDstream.clear();
+        CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+        CMD = CMDstream.str();
+        RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+
+        Sleep(10);
+    }
+    Rx = RxC;
+    Lx = LxC;
+    Ry = RyC;
+    Ly = LyC;
+
+    //Send new motor positions to the owl servos
+    CMDstream.str("");
+    CMDstream.clear();
+    CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+    CMD = CMDstream.str();
+    RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 }
