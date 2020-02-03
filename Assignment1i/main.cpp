@@ -220,9 +220,9 @@ void chameleon(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPac
 void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
     Ry = RyC;
     Ly = LyC;
-    for(int i=0; i<=25; i++){
-        float rEyeVal = (i*(-(RxRm-RxLm)/2))+((RxRm+RxLm)/2);
-        float lEyeVal = (i*((LxRm-LxLm)/2))+((LxRm+LxLm)/2);
+    for(int i=0; i<=50; i++){
+        float rEyeVal = ((float)i/-25.0f)*(RxC-RxLm)+RxC;
+        float lEyeVal = ((float)i/25.0f)*(LxRm-LxC)+LxC;
         Rx = (int)rEyeVal;
         Lx = (int)lEyeVal;
 
@@ -234,11 +234,12 @@ void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPack
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
         Sleep(10);
+        cout<<"loop 1 "<< rEyeVal <<endl;
     }
     Sleep(500);
-    for(int i=25; i<=0; i--){
-        float rEyeVal = (i*(-(RxRm-RxLm)/2))+((RxRm+RxLm)/2);
-        float lEyeVal = (i*((LxRm-LxLm)/2))+((LxRm+LxLm)/2);
+    for(int i=50; i>=0; i--){
+        float rEyeVal = ((float)i/-25.0f)*(RxC-RxLm)+RxC;
+        float lEyeVal = ((float)i/25.0f)*(LxRm-LxC)+LxC;
         Rx = (int)rEyeVal;
         Lx = (int)lEyeVal;
 
@@ -248,7 +249,7 @@ void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPack
         CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
         CMD = CMDstream.str();
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
-
+        cout<<"loop 2 "<< rEyeVal <<endl;
         Sleep(10);
     }
 }
