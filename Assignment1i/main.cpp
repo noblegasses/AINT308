@@ -130,24 +130,24 @@ int main(int argc, char *argv[])
 //            Neck=Neck-5;
 //            break;
         }
-//        for(int i=0; i<=2*pi*50; i++){
-//            float scaledI=(float)i/50.0f;
-//            float rawSin = sin(scaledI);
-//            float neckVal = (rawSin*425)+1525;
-//            //float neckVal = (rawSin-(-1))*((1950-1100)/((-1)-1))+1100;
-//            Neck = (int)neckVal;
+        for(int i=0; i<=2*pi*50; i++){
+            float scaledI=(float)i/50.0f;
+            float rawSin = sin(scaledI);
+            float neckVal = (rawSin*425)+1525;
+            //float neckVal = (rawSin-(-1))*((1950-1100)/((-1)-1))+1100;
+            Neck = (int)neckVal;
 
-//            cout << Neck;
+            cout << Neck;
 
-//            //Send new motor positions to the owl servos
-//            CMDstream.str("");
-//            CMDstream.clear();
-//            CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
-//            CMD = CMDstream.str();
-//            RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+            //Send new motor positions to the owl servos
+            CMDstream.str("");
+            CMDstream.clear();
+            CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
+            CMD = CMDstream.str();
+            RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
-//            Sleep(10);
-//        }
+            Sleep(10);
+        }
     } // END cursor control loop
 
     // close windows down
@@ -189,8 +189,8 @@ void scanEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacke
 
 void chameleon(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
 
-
-    for(int i = 0; i<=3; i++){
+    time_t timer;
+    for(int i = 0; i<=15; i++){
         int randEye = rand() %3;
         unsigned long randTime = rand() %1000 + 50;
         if(randEye == 0){
