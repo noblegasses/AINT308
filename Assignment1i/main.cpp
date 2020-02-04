@@ -23,6 +23,7 @@ Use this code as a base for your assignment.
 using namespace std;
 using namespace cv;
 
+//Function Prototypes for eye movements
 void scanEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket);
 void chameleon(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket);
 void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket);
@@ -146,6 +147,7 @@ int main(int argc, char *argv[])
             CMD = CMDstream.str();
             RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
+            //Wait for 10 ms
             Sleep(10);
         }
     } // END cursor control loop
@@ -164,15 +166,21 @@ int main(int argc, char *argv[])
     exit(0); // exit here for servo testing only
 }
 
-
+//Function to perform a horizontal scan with the eyes
 void scanEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
+    //Set the eyes' y-axis positions to their centre
     Ry = RyC;
     Ly = LyC;
+    //For a whole sine wave (in 50 steps)
     for(int i=0; i<=2*pi*50; i++){
+        //Scale i to within 0 - 2pi
         float scaledI=(float)i/50.0f;
+        //Calculate the sine value
         float rawSin = sin(scaledI);
+        //Scale the sine value to the range of the eye motion
         float rEyeVal = (rawSin*((RxRm-RxLm)/2))+((RxRm+RxLm)/2);
         float lEyeVal = (rawSin*((LxRm-LxLm)/2))+((LxRm+LxLm)/2);
+        //Cast the values as int, and set the eye positions to them
         Rx = (int)rEyeVal;
         Lx = (int)lEyeVal;
 
@@ -183,24 +191,30 @@ void scanEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacke
         CMD = CMDstream.str();
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
+        //Wait for 10 ms
         Sleep(10);
     }
 }
 
+//Function to perform chameleon-like eye motion
 void chameleon(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
-
-    time_t timer;
+    //Perform the action 15 times
     for(int i = 0; i<=15; i++){
+        //Get a random value between 0-2 to choose which eye(s) to move
         int randEye = rand() %3;
+        //Get a random value between 50-1000 for use as a wait time in ms
         unsigned long randTime = rand() %1000 + 50;
+        //If randEye is 0, move both eyes to a random position
         if(randEye == 0){
             Rx = rand() %(RxRm-RxLm) + RxLm;
             Ry = rand() %(RyTm-RyBm) + RyBm;
             Lx = rand() %(LxRm-LxLm) + LxLm;
             Ly = rand() %(LyBm-LyTm) + LyTm;
+        //If randEye is 1, move the right eye to a random position
         } else if(randEye == 1){
             Rx = rand() %(RxRm-RxLm) + RxLm;
             Ry = rand() %(RyTm-RyBm) + RyBm;
+        //If randEye is 2, move the left eye to a random position
         } else if(randEye == 2){
             Lx = rand() %(LxRm-LxLm) + LxLm;
             Ly = rand() %(LyBm-LyTm) + LyTm;
@@ -213,16 +227,22 @@ void chameleon(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPac
         CMD = CMDstream.str();
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
+        //Wait for a random amount of time
         Sleep(randTime);
     }
 }
 
+//Function to cross the owl's eyes
 void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
+    //Set the eyes' y-axis positions to their centre
     Ry = RyC;
     Ly = LyC;
+    //Perform the movement in 50 steps
     for(int i=0; i<=50; i++){
+        //Scale i to the eyes' movement range
         float rEyeVal = ((float)i/-25.0f)*(RxC-RxLm)+RxC;
         float lEyeVal = ((float)i/25.0f)*(LxRm-LxC)+LxC;
+        //Cast the values as int, and set the eye positions to them
         Rx = (int)rEyeVal;
         Lx = (int)lEyeVal;
 
@@ -233,13 +253,18 @@ void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPack
         CMD = CMDstream.str();
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
+        //Wait for 10 ms
         Sleep(10);
         cout<<"loop 1 "<< rEyeVal <<endl;
     }
+    //Wait for 0.5s (500ms)
     Sleep(500);
+    //Perform the movement in 50 steps
     for(int i=50; i>=0; i--){
+        //Scale i to the eyes' movement range
         float rEyeVal = ((float)i/-25.0f)*(RxC-RxLm)+RxC;
         float lEyeVal = ((float)i/25.0f)*(LxRm-LxC)+LxC;
+        //Cast the values as int, and set the eye positions to them
         Rx = (int)rEyeVal;
         Lx = (int)lEyeVal;
 
@@ -250,20 +275,27 @@ void crossEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPack
         CMD = CMDstream.str();
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
         cout<<"loop 2 "<< rEyeVal <<endl;
+        //Wait for 10 ms
         Sleep(10);
     }
 }
 
 void rollEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacket){
+    //Set the eyes' y-axis positions to their centre
     Ry = RyC;
     Ly = LyC;
+    //Between pi and 2pi in 50 steps
     for(int i=pi*50; i<=2*pi*50; i++){
+        //Scale i to within pi - 2pi
         float scaledI=(float)i/50.0f;
+        //Calculate the sine value
         float rawSin = sin(scaledI);
+        //Scale the sine value to the range of the eye motion
         float rxEyeVal = (rawSin*((RxRm-RxLm)/2))+(RxRm);
         float lxEyeVal = (rawSin*((LxRm-LxLm)/2))+(LxRm);
         float ryEyeVal = (rawSin*(-(RyTm-RyBm)/2))+((RyTm+RyBm)/2);
         float lyEyeVal = (rawSin*((LyBm-LyTm)/2))+((LyTm+LyBm)/2);
+        //Cast the values as int, and set the eye positions to them
         Rx = (int)rxEyeVal;
         Lx = (int)lxEyeVal;
         Ry = (int)ryEyeVal;
@@ -276,8 +308,10 @@ void rollEye(ostringstream &CMDstream, string CMD, SOCKET u_sock, string RxPacke
         CMD = CMDstream.str();
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
+        //Wait for 10 ms
         Sleep(10);
     }
+    //Set the eyes' positions to their centre
     Rx = RxC;
     Lx = LxC;
     Ry = RyC;
