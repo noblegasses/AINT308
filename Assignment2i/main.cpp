@@ -150,18 +150,22 @@ int main(int argc, char *argv[])
         Right=FrameFlpd(Rect(640, 0, 640, 480)); // using a rectangle
 
         //match template within right eye
-        OwlCorrel OWL;
-        OWL = Owl_matchTemplate(Left, OWLtempl);
+        OwlCorrel OWLL;
+        OwlCorrel OWLR;
+        OWLL = Owl_matchTemplate(Left, OWLtempl);
+        OWLR = Owl_matchTemplate(Right, OWLtempl);
 
         //Draw a rectangle to define the tracking window
         rectangle(Right, target, Scalar::all(255), 2, 8, 0 );
-        rectangle(Left, OWL.Match, Point( OWL.Match.x + OWLtempl.cols , OWL.Match.y + OWLtempl.rows), Scalar::all(255), 2, 8, 0 );
+        rectangle(Left, target, Scalar::all(255), 2, 8, 0 );
+        rectangle(Left, OWLL.Match, Point( OWLL.Match.x + OWLtempl.cols , OWLL.Match.y + OWLtempl.rows), Scalar::all(255), 2, 8, 0 );
+        rectangle(Right, OWLR.Match, Point( OWLR.Match.x + OWLtempl.cols , OWLR.Match.y + OWLtempl.rows), Scalar::all(255), 2, 8, 0 );
 
         //Display images
         imshow("Target",OWLtempl);
         imshow("Left", Left);
         imshow("Right", Right);
-        imshow("Correl",OWL.Result );
+        imshow("Correl",OWLL.Result );
         waitKey(10);
 
         //Control the left eye to track the target
@@ -171,13 +175,23 @@ int main(int argc, char *argv[])
 
         //Update x-axis value based on target pos
         double LxScaleV = LxRangeV/static_cast<double>(640);            //Calculate number of pwm steps per pixel
-        double Xoff= (OWL.Match.x + OWLtempl.cols/2 -320)/LxScaleV ;    //Compare to centre of image
-        Lx=static_cast<int>(Lx+Xoff*KPx);                               //Update Servo position
+        double Lxoff= (OWLL.Match.x + OWLtempl.cols/2 -320)/LxScaleV ;    //Compare to centre of image
+        Lx=static_cast<int>(Lx+Lxoff*KPx);                               //Update Servo position
 
         //Update y-axis value based on target pos
         double LyScaleV = LyRangeV/static_cast<double>(480);            //Calculate number of pwm steps per pixel
-        double Yoff= ((OWL.Match.y + OWLtempl.rows/2 - 240)/LyScaleV) ; //Compare to centre of image
-        Ly=static_cast<int>(Ly-Yoff*KPy);                               //Update Servo position
+        double Lyoff= ((OWLL.Match.y + OWLtempl.rows/2 - 240)/LyScaleV) ; //Compare to centre of image
+        Ly=static_cast<int>(Ly-Lyoff*KPy);                               //Update Servo position
+
+        //Update x-axis value based on target pos
+        double RxScaleV = RxRangeV/static_cast<double>(640);            //Calculate number of pwm steps per pixel
+        double Rxoff= (OWLR.Match.x + OWLtempl.cols/2 -320)/RxScaleV ;    //Compare to centre of image
+        Rx=static_cast<int>(Rx+Rxoff*KPx);                               //Update Servo position
+
+        //Update y-axis value based on target pos
+        double RyScaleV = RyRangeV/static_cast<double>(480);            //Calculate number of pwm steps per pixel
+        double Ryoff= ((OWLR.Match.y + OWLtempl.rows/2 - 240)/RyScaleV) ; //Compare to centre of image
+        Ry=static_cast<int>(Ry-Ryoff*KPy);
 
         //Send new motor positions to the owl servos
         CMDstream.str("");
