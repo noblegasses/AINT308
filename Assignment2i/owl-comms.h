@@ -103,7 +103,7 @@ string OwlSendPacket (SOCKET u_sock, string CMD){
     if(N==SOCKET_ERROR){
         std::cout<<"Error in Receiving: "<<WSAGetLastError()<<std::endl;
     }
-    std::cout<<"OK:" << N <<std::endl;
+    //std::cout<<"OK:" << N <<std::endl;
     return ("OK:" );
 }
 #else

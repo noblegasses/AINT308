@@ -20,8 +20,13 @@ Use this code as a base for your assignment.
 #include "owl-comms.h"
 #include "owl-cv.h"
 
+#define pi 3.14159
+#define IPD 66
+
 using namespace std;
 using namespace cv;
+
+double distCalc(double Rx, double Lx);
 
 int main(int argc, char *argv[])
 {
@@ -221,7 +226,20 @@ int main(int argc, char *argv[])
         CMDstream << Rx << " " << Ry << " " << Lx << " " << Ly << " " << Neck;
         CMD = CMDstream.str();
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
+
+        double Dist = distCalc(Rx, Lx);
+
     }
+}
+
+double distCalc(double Rx, double Lx){
+
+   double rEyeAngle = ((pi+pi)(Rx-RxLm/(RxRm-RxLm)))-pi;
+   double lEyeAngle = (Lx*((pi+pi)/2));
+   std::cout << rEyeAngle << ": Right   " << lEyeAngle << ": Left\n\r";
+   double lDist = (IPD*cos(rEyeAngle))/sin(lEyeAngle+rEyeAngle);
+   double Dist = sqrt(pow(2.0,lDist)+(pow(2.0, IPD)/4) - (lDist*IPD*sin(lEyeAngle)));
+   return Dist;
 }
 
 
