@@ -99,6 +99,7 @@ int main(int argc, char *argv[])
 
         //Read keypress and move the corresponding motor
         int key = waitKey(10);
+
         switch (key){
         case 'w': //up
             Ry=Ry+5;
@@ -132,6 +133,7 @@ int main(int argc, char *argv[])
             break;
         case 'c'://left
             Tracking=true;
+            std::cout<<"tracking";
             //Rect target= Rect(320-32, 240-32, 64, 64); //defined in owl-cv.h
             OWLtempl=Right(target); //set the tracking template to whatever is within the tracking window in the right eye
             break;
@@ -184,7 +186,7 @@ int main(int argc, char *argv[])
 
         //Control the left eye to track the target
         //try altering KPx & KPy to see the settling time/overshoot
-        double factor = 2.0;
+        double factor = 1.0;
         double KPx=0.05*factor; // track rate X
         double KPy=0.05*factor; // track rate Y
         double KIx = 0.001*factor;//integral gain x
@@ -228,17 +230,17 @@ int main(int argc, char *argv[])
         RxPacket= OwlSendPacket (u_sock, CMD.c_str());
 
         double Dist = distCalc(Rx, Lx);
-
+        std::cout<<"  Distance: "<<Dist<<"\n\r";
     }
 }
 
 double distCalc(double Rx, double Lx){
 
-   double rEyeAngle = ((pi+pi)(Rx-RxLm/(RxRm-RxLm)))-pi;
-   double lEyeAngle = (Lx*((pi+pi)/2));
-   std::cout << rEyeAngle << ": Right   " << lEyeAngle << ": Left\n\r";
+   double rEyeAngle = ((Rx-RxLm)/(RxRm-RxLm)*(pi+pi)-pi);
+   double lEyeAngle = (Lx-LxLm)/(LxRm-LxLm)*(pi+pi)-pi;
    double lDist = (IPD*cos(rEyeAngle))/sin(lEyeAngle+rEyeAngle);
-   double Dist = sqrt(pow(2.0,lDist)+(pow(2.0, IPD)/4) - (lDist*IPD*sin(lEyeAngle)));
+   //std::cout<<"left Eye: "<<lEyeAngle<<" right Eye: "<<rEyeAngle<< " left dist: "<<lDist;
+   double Dist = sqrt(pow(lDist,2.0)+(pow((IPD/2),2.0)) - (lDist*IPD*sin(lEyeAngle)));
    return Dist;
 }
 
