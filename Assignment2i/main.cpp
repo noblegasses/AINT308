@@ -22,6 +22,7 @@ Use this code as a base for your assignment.
 
 #define pi 3.14159
 #define IPD 66
+#define pwmDeg 10.730
 
 using namespace std;
 using namespace cv;
@@ -222,6 +223,31 @@ int main(int argc, char *argv[])
         Ry=static_cast<int>(Ry-Ryoff*KPy-Ryoffi*KIy+(Ryoff-Ryoffold)*KDy);
         Ryoffold = Ryoff;
 
+        if (Rx>RxRm){
+            Rx = RxRm;
+           }
+        if (Rx<RxLm){
+            Rx = RxLm;
+        }
+        if(Lx>LxRm){
+            Lx = LxRm;
+        }
+        if(Lx<LxLm){
+            Lx = LxLm;
+        }
+        if (Ry>RyTm){
+            Ry = RyTm;
+           }
+        if (Ry<RyBm){
+            Ry = RyBm;
+        }
+        if(Ly>LyBm){
+            Ly = LyBm;
+        }
+        if(Ly<LyTm){
+            Ly = LyTm;
+        }
+
         //Send new motor positions to the owl servos
         CMDstream.str("");
         CMDstream.clear();
@@ -236,8 +262,11 @@ int main(int argc, char *argv[])
 
 double distCalc(double Rx, double Lx){
 
-   double rEyeAngle = ((Rx-RxLm)/(RxRm-RxLm)*(pi+pi)-pi);
-   double lEyeAngle = (Lx-LxLm)/(LxRm-LxLm)*(pi+pi)-pi;
+   //std::cout<<"Right Convergence "<<Rx<< " Left Convergence " << Lx<<"\n\r";
+   double rEyeAngle=((double(Rx-RxC)*pi)/(pwmDeg*180))*-1; // in radians
+   double lEyeAngle=(double(Lx-LxC)*pi)/(pwmDeg*180);
+   //double rEyeAngle = ((Rx-RxC)/(RxC)*(pi+pi)-pi);
+   //double lEyeAngle = (Lx-LxC)*(pi+pi)-pi;
    double lDist = (IPD*cos(rEyeAngle))/sin(lEyeAngle+rEyeAngle);
    //std::cout<<"left Eye: "<<lEyeAngle<<" right Eye: "<<rEyeAngle<< " left dist: "<<lDist;
    double Dist = sqrt(pow(lDist,2.0)+(pow((IPD/2),2.0)) - (lDist*IPD*sin(lEyeAngle)));
